@@ -126,6 +126,19 @@ public class LoginController implements CommunityConstant {
         }
     }
 
+    @RequestMapping(path = "/updatePwd",method = RequestMethod.POST)
+    public String uodatePwd(String oldPwd,String newPwd,Model model){
+        Map<String ,Object> map = userService.updatePwd(oldPwd,newPwd);
+        if (map == null || map.isEmpty()){
+            model.addAttribute("passwordMsg", "修改成功!");
+            return "/site/setting";
+        }else {
+            model.addAttribute("passwordMsg",map.get("passwordMsg"));
+        }
+        return "/site/setting";
+    }
+
+
     @RequestMapping(path = "/logout",method = RequestMethod.GET)
     public String logout(@CookieValue("ticket") String ticket){
         userService.logout(ticket);

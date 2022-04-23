@@ -7,6 +7,7 @@ import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
+import com.nowcoder.community.util.HostHolder;
 import com.nowcoder.community.util.MailClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,9 @@ public class UserService implements CommunityConstant {
 
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    private HostHolder hostHolder;
 
     @Value("${community.path.domain}")
     private String domain;
@@ -169,5 +173,43 @@ public class UserService implements CommunityConstant {
     public LoginTicket findLoginTicket(String ticket){
         return loginTicketMapper.selectByTicket(ticket);
     }
+
+    public int updateHeader(int userId,String headerUrl){
+        return  userMapper.updateHeader(userId,headerUrl);
+    }
+
+    public Map<String,Object> updatePwd(String oldPwd,String newPwd){
+        Map<String ,Object> map = new HashMap<>();
+
+        if (StringUtils.isBlank(oldPwd)){
+            map.put("oldPwdMsg","原始密码不能为空！");
+            return map;
+        }
+        if (StringUtils.isBlank(newPwd)){
+            map.put("newPwdMsg","新密码不能为空！");
+            return map;
+        }
+
+        User user = userMapper.selectByName(hostHolder.getUser().getUsername());
+        oldPwd = CommunityUtil.md5(oldPwd + user.getSalt());
+        if (user.getPassword()!=oldPwd){
+            map.put("oldPwdMsg","原密码错误！");
+            return map;
+        }
+
+        newPwd = CommunityUtil.md5(newPwd + user.getSalt());
+        if (user.getPassword()==oldPwd){
+            if (userMapper.updatePassword(user.getId(),newPwd)==1){
+                return map;
+            }else {
+                map.put("passwordMsg","修改失败");
+                return map;
+            }
+        }
+        map.put("passwordMsg","修改失败");
+        return map;
+    }
+
+
 
 }
