@@ -67,10 +67,11 @@ public class SensitiveFilter {
      * @param text 待过滤的文本
      * @return 过滤后的返回值
      */
-    public String filter(String text){
-        if(StringUtils.isBlank(text)){
+    public String filter(String text) {
+        if (StringUtils.isBlank(text)) {
             return null;
         }
+
         // 指针1
         TrieNode tempNode = rootNode;
         // 指针2
@@ -80,47 +81,45 @@ public class SensitiveFilter {
         // 结果
         StringBuilder sb = new StringBuilder();
 
-        while(begin < text.length()){
-            if(position < text.length()) {
-                Character c = text.charAt(position);
+        while (position < text.length()) {
+            char c = text.charAt(position);
 
-                // 跳过符号
-                if (isSymbol(c)) {
-                    if (tempNode == rootNode) {
-                        begin++;
-                        sb.append(c);
-                    }
-                    position++;
-                    continue;
+            // 跳过符号
+            if (isSymbol(c)) {
+                // 若指针1处于根节点,将此符号计入结果,让指针2向下走一步
+                if (tempNode == rootNode) {
+                    sb.append(c);
+                    begin++;
                 }
-
-                // 检查下级节点
-                tempNode = tempNode.getSubNode(c);
-                if (tempNode == null) {
-                    // 以begin开头的字符串不是敏感词
-                    sb.append(text.charAt(begin));
-                    // 进入下一个位置
-                    position = ++begin;
-                    // 重新指向根节点
-                    tempNode = rootNode;
-                }
-                // 发现敏感词
-                else if (tempNode.isKeywordEnd()) {
-                    sb.append(REPLACEMENT);
-                    begin = ++position;
-                }
-                // 检查下一个字符
-                else {
-                    position++;
-                }
+                // 无论符号在开头或中间,指针3都向下走一步
+                position++;
+                continue;
             }
-            // position遍历越界仍未匹配到敏感词
-            else{
+
+            // 检查下级节点
+            tempNode = tempNode.getSubNode(c);
+            if (tempNode == null) {
+                // 以begin开头的字符串不是敏感词
                 sb.append(text.charAt(begin));
+                // 进入下一个位置
                 position = ++begin;
+                // 重新指向根节点
                 tempNode = rootNode;
+            } else if (tempNode.isKeywordEnd()) {
+                // 发现敏感词,将begin~position字符串替换掉
+                sb.append(REPLACEMENT);
+                // 进入下一个位置
+                begin = ++position;
+                // 重新指向根节点
+                tempNode = rootNode;
+            } else {
+                // 检查下一个字符
+                position++;
             }
         }
+
+        // 将最后一批字符计入结果
+        sb.append(text.substring(begin));
         return sb.toString();
     }
 
