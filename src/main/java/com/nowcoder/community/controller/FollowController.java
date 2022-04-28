@@ -42,7 +42,7 @@ public class FollowController implements CommunityConstant {
 
         followService.follow(user.getId(), entityType, entityId);
 
-        //触发关注事件
+        // 触发关注事件
         Event event = new Event()
                 .setTopic(TOPIC_FOLLOW)
                 .setUserId(hostHolder.getUser().getId())

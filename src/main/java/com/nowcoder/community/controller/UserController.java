@@ -1,6 +1,5 @@
 package com.nowcoder.community.controller;
 
-
 import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.FollowService;
@@ -54,14 +53,14 @@ public class UserController implements CommunityConstant {
     @Autowired
     private FollowService followService;
 
-    @RequestMapping(path = "/setting", method = RequestMethod.GET)
     @LoginRequired
+    @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
-    @RequestMapping(path = "/upload", method = RequestMethod.POST)
     @LoginRequired
+    @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
             model.addAttribute("error", "您还没有选择图片!");
@@ -69,7 +68,7 @@ public class UserController implements CommunityConstant {
         }
 
         String fileName = headerImage.getOriginalFilename();
-        String suffix = fileName.substring(fileName.lastIndexOf(".") );
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
         if (StringUtils.isBlank(suffix)) {
             model.addAttribute("error", "文件的格式不正确!");
             return "/site/setting";
@@ -101,7 +100,7 @@ public class UserController implements CommunityConstant {
         // 服务器存放路径
         fileName = uploadPath + "/" + fileName;
         // 文件后缀
-        String suffix = fileName.substring(fileName.lastIndexOf(".") +1);
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
         // 响应图片
         response.setContentType("image/" + suffix);
         try (
@@ -118,40 +117,34 @@ public class UserController implements CommunityConstant {
         }
     }
 
-    //个人主页
-    @RequestMapping(path = "/profile/{userId}",method = RequestMethod.GET)
-    public String getProfilePage(@PathVariable("userId") int userId,Model model){
+    // 个人主页
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
         User user = userService.findUserById(userId);
-        if (user == null){
-            throw  new  IllegalArgumentException("用户不存在！");
+        if (user == null) {
+            throw new RuntimeException("该用户不存在!");
         }
 
-        //用户
-        model.addAttribute("user",user);
-
-        //点赞数量
+        // 用户
+        model.addAttribute("user", user);
+        // 点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
-        model.addAttribute("likeCount",likeCount);
+        model.addAttribute("likeCount", likeCount);
 
-        //关注数量
-        long followeeCount = followService.findFolloweeCount(userId,ENTITY_TYPE_USER);
-        model.addAttribute("followeeCount",followeeCount);
-        //粉丝数量
-        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER,userId);
-        model.addAttribute("followerCount",followerCount);
-        //是否已关注
+        // 关注数量
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+        // 粉丝数量
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+        // 是否已关注
         boolean hasFollowed = false;
-        if (hostHolder.getUser()!=null){
-            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
         }
-        model.addAttribute("hasFollowed",hasFollowed);
-
-
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "/site/profile";
-
     }
-
-
 
 }

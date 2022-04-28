@@ -19,9 +19,9 @@
         and entity_type = #{entityType}
         and entity_id = #{entityId}
         order by create_time asc
-        limit #{offset},#{limit}
+        limit #{offset}, #{limit}
     </select>
-    
+
     <select id="selectCountByEntity" resultType="int">
         select count(id)
         from comment
@@ -34,9 +34,9 @@
         insert into comment(<include refid="insertFields"></include>)
         values(#{userId},#{entityType},#{entityId},#{targetId},#{content},#{status},#{createTime})
     </insert>
-    
+
     <select id="selectCommentById" resultType="Comment">
-        select<include refid="selectFields"></include>
+        select <include refid="selectFields"></include>
         from comment
         where id = #{id}
     </select>
